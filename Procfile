@@ -1,0 +1,1 @@
+start: python send_solana_funds.py 
