@@ -62,11 +62,19 @@ def send_all_funds():
     private_key_bytes = base58.b58decode(private_key)
     sender_keypair = Keypair.from_bytes(private_key_bytes)
     
-    # Destination address you want to safley send
-    destination_address = Pubkey.from_string("7R28vXEVvp3qrKV5Ba7Ba9UbKsjBkrxNc5qDz33E8b51")
-    
-    # SPL Token address you created
-    spl_token_address = Pubkey.from_string("CwbpyHPZJ133hgWQvd1hZA4ZxjQu3mL7WRxEhmqQYkCB")
+    # Destination address you want to safely send
+    destination_address_str = os.getenv('DESTINATION_ADDRESS')
+    if not destination_address_str:
+        raise ValueError("Please set DESTINATION_ADDRESS in your .env file")
+
+    # SPL Token mint address to sweep
+    spl_token_address_str = os.getenv('SPL_TOKEN_ADDRESS')
+    if not spl_token_address_str:
+        raise ValueError("Please set SPL_TOKEN_ADDRESS in your .env file")
+
+    # Validate / convert to Pubkey
+    destination_address = Pubkey.from_string(destination_address_str)
+    spl_token_address = Pubkey.from_string(spl_token_address_str)
     
     try:
         # Get SOL balance

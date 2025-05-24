@@ -8,7 +8,7 @@ Automated Solana wallet sweeper that periodically transfers all SOL and a chosen
 
 * Monitors the wallet every *n* seconds (default **5 s**) and automatically sweeps:
   * Native SOL balance – keeps the minimum lamports required for fees.
-  * A specific SPL token (configurable in the code).
+  * A specific SPL token (configurable via env variable).
 * Writes detailed logs to `solana_transfers.log` *and* to STDOUT.
 * Ready-to-deploy on [Railway](https://railway.app) with **zero extra config** (Nixpacks build + `Procfile`).
 
@@ -53,6 +53,12 @@ $ python send_solana_funds.py
 # Base-58 encoded 64-byte private key (NOT the mnemonic!)
 SOLANA_PRIVATE_KEY="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 
+# The wallet that receives all swept funds (cold wallet)
+DESTINATION_ADDRESS="DestinationWalletPubkeyHere"
+
+# SPL token mint that should be swept (leave empty to disable)
+SPL_TOKEN_ADDRESS="CwbpyHPZJ133hgWQvd1hZA4ZxjQu3mL7WRxEhmqQYkCB"
+
 # Optional – interval in seconds between scans (default 5)
 SCAN_INTERVAL=10
 ```
@@ -67,7 +73,12 @@ SCAN_INTERVAL=10
    start: python send_solana_funds.py
    ```
 3. In the Railway **Variables** tab add at least `SOLANA_PRIVATE_KEY` (and optionally `SCAN_INTERVAL`).
-4. Hit **Deploy** – your worker starts immediately and restarts on crash/redeploy.
+4. In the Railway **Variables** tab add:
+   * `SOLANA_PRIVATE_KEY` – your hot-wallet private key
+   * `DESTINATION_ADDRESS` – the cold-wallet address that will receive funds
+   * `SPL_TOKEN_ADDRESS` – the SPL-token mint to sweep (optional)
+   * (optional) `SCAN_INTERVAL` – override the 5-second default
+5. Hit **Deploy** – your worker starts immediately and restarts on crash/redeploy.
 
 That's it! 🎉
 
@@ -75,9 +86,15 @@ That's it! 🎉
 
 ## 📝 Customisation
 
-* **Destination address** – edit `destination_address` in `send_solana_funds.py`.
-* **SPL token mint** – edit `spl_token_address` in the same file.
-* **Gas reserve** – tweak `min_sol_keep`. Currently set to keep 0.000005 SOL.
+All behaviour is now controlled via environment variables – **no code edits required**:
+
+| Variable | Purpose |
+|----------|---------|
+| `DESTINATION_ADDRESS` | The cold-wallet that will receive the SOL + tokens. |
+| `SPL_TOKEN_ADDRESS`   | The SPL token mint to sweep alongside SOL. |
+| `SCAN_INTERVAL`       | Seconds between balance scans (optional, default 5). |
+
+Simply change the values in your `.env` (or Railway "Variables" tab) and restart the worker.
 
 ---
 
